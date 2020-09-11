@@ -1,12 +1,11 @@
 from django.shortcuts import render
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 import markdown2
 from django import forms
+from django.shortcuts import redirect
 from . import util
 
 class SearchForm(forms.Form):
-    query = forms.CharField(name="Search Query", inital="Query here...", max_length=200)
+    query = forms.CharField(label="Search Query", max_length=200)
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -30,10 +29,20 @@ def entry(request, entryname):
             "form": SearchForm()
         })
 
-def search(request, data):
-    query = SearchForm(request.GET)
+def search(request):
+    form = SearchForm(request.GET)    
     matches = []
-    if query.is_valid():
-        entryname = query.cleaned_data["query"]
-        
-    return HttpResponseRedirect(reverse("entry"))
+    if form.is_valid():
+        entryname = form.cleaned_data["query"]
+        entries = util.list_entries()
+        matches = [e for e in entries if entryname.lower() in e.lower()]
+        num_matches = len(matches)
+        if not matches:
+            return redirect("entry", entryname=entryname)
+        elif num_matches == 1 and entryname == matches:
+            return redirect("entry", entryname=matches[0])
+        else:
+            return render(request, "encyclopedia/search.html", {
+                "matches": matches,
+                "form": SearchForm()
+            })
