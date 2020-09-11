@@ -36,10 +36,9 @@ def search(request):
         entryname = form.cleaned_data["query"]
         entries = util.list_entries()
         matches = [e for e in entries if entryname.lower() in e.lower()]
-        num_matches = len(matches)
         if not matches:
             return redirect("entry", entryname=entryname)
-        elif num_matches == 1 and entryname.lower() == matches[0].lower():
+        elif len(matches) == 1 and entryname.lower() == matches[0].lower():
             return redirect("entry", entryname=matches[0])
         else:
             return render(request, "encyclopedia/search.html", {
