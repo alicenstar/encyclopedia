@@ -39,7 +39,7 @@ def search(request):
         num_matches = len(matches)
         if not matches:
             return redirect("entry", entryname=entryname)
-        elif num_matches == 1 and entryname == matches:
+        elif num_matches == 1 and entryname.lower() == matches[0].lower():
             return redirect("entry", entryname=matches[0])
         else:
             return render(request, "encyclopedia/search.html", {
