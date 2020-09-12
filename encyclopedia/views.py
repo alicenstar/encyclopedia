@@ -10,6 +10,10 @@ class NewPage(forms.Form):
     title = forms.CharField(label="Page Title")
     content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea)
 
+# class EditEntry(forms.Form):
+#     title = forms.CharField(label="Page Title", initial=entryname)
+#     content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea, initial=entrymd)
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -70,5 +74,20 @@ def newpage(request):
         return render(request, "encyclopedia/newpage.html", {
             "error": "",
             "newpage": NewPage(),
+            "form": SearchForm()
+        })
+
+def edit(request, title):
+    if request.method == "POST":
+        form = NewPage(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            content = form.cleaned_data["content"]
+            util.save_entry(title, content)
+            return redirect("entry", entryname=title)
+    else:
+        content = util.get_entry(title)
+        return render(request, "encyclopedia/edit.html", {
+            "editform": NewPage(initial={"title": title, "content": content}),
             "form": SearchForm()
         })
