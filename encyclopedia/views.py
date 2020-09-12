@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 import markdown2
 from django import forms
 from . import util
+import random
 
 class SearchForm(forms.Form):
     query = forms.CharField(label="Search Wiki", max_length=200)
@@ -9,10 +10,6 @@ class SearchForm(forms.Form):
 class NewPage(forms.Form):
     title = forms.CharField(label="Page Title")
     content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea)
-
-# class EditEntry(forms.Form):
-#     title = forms.CharField(label="Page Title", initial=entryname)
-#     content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea, initial=entrymd)
 
 
 def index(request):
@@ -91,3 +88,8 @@ def edit(request, title):
             "editform": NewPage(initial={"title": title, "content": content}),
             "form": SearchForm()
         })
+
+def randomentry(request):
+    titles = util.list_entries()
+    title = random.choice(titles)
+    return redirect("entry", entryname=title)
