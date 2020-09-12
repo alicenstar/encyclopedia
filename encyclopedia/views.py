@@ -8,7 +8,8 @@ class SearchForm(forms.Form):
 
 class NewPage(forms.Form):
     title = forms.CharField(label="Page Title")
-    md_content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea)
+    content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea)
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -50,7 +51,24 @@ def search(request):
             })
 
 def newpage(request):
-    return render(request, "encyclopedia/newpage.html", {
-        "newpage": NewPage(),
-        "form": SearchForm()
-    })
+    if request.method == "POST":
+        form = NewPage(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            content = form.cleaned_data["content"]
+            # If an entry with that name already exists, display error
+            if util.get_entry(title):
+                return render(request, "encyclopedia/newpage.html", {
+                    "error": "<h4 style='color:red;'>An entry already exists with that name.</h4>",
+                    "newpage": NewPage(),
+                    "form": SearchForm()
+                })
+            else:
+                util.save_entry(title, content)
+                return redirect("entry", entryname=title)
+    else:
+        return render(request, "encyclopedia/newpage.html", {
+            "error": "",
+            "newpage": NewPage(),
+            "form": SearchForm()
+        })
