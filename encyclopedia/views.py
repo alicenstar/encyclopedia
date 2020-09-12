@@ -1,11 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import markdown2
 from django import forms
-from django.shortcuts import redirect
 from . import util
 
 class SearchForm(forms.Form):
-    query = forms.CharField(label="Search Query", max_length=200)
+    query = forms.CharField(label="Search Wiki", max_length=200)
+
+class NewPage(forms.Form):
+    title = forms.CharField(label="Page Title")
+    md_content = forms.CharField(label="Markdown Content for Page", widget=forms.Textarea)
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -45,3 +48,9 @@ def search(request):
                 "matches": matches,
                 "form": SearchForm()
             })
+
+def newpage(request):
+    return render(request, "encyclopedia/newpage.html", {
+        "newpage": NewPage(),
+        "form": SearchForm()
+    })
